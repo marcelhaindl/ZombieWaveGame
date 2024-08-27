@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
         if (movement != Vector3.zero)
         {
             // Align player rotation with movement direction relative to camera
-            Vector3 direction = Camera.main.transform.TransformDirection(movement);
+            Vector3 direction = Camera.main!.transform.TransformDirection(movement);
             direction.y = 0f; // Ignore vertical rotation
 
             transform.rotation = Quaternion.LookRotation(-direction);
@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
         while (true)
         {
             bool raycastSuccess = Physics.Raycast(transform.position, transform.up * -1, out hit);
-            if (raycastSuccess && hit.collider.gameObject.CompareTag("Ground") && hit.distance <= 0.100001)
+            if (raycastSuccess && (hit.collider.gameObject.CompareTag("Ground") || hit.collider.gameObject.layer == LayerMask.NameToLayer("Object")) && hit.distance <= 0.100001)
             {
                 if (!isOnGround)
                 {
@@ -178,16 +178,19 @@ public class PlayerController : MonoBehaviour
             var raycastSuccess = Physics.Raycast(transform.position, transform.forward, out hit);
             if (raycastSuccess && hit.collider.gameObject.CompareTag("Zombie") && hit.distance <= 1.4f)
             {
-                // Deduct health from zombie
-                var damage = Random.Range(minDamage, maxDamage);
-                var criticalHitVariable = Random.Range(0, 100);
-                if (criticalHitVariable < probabilityCriticalHit * 100)
+                if (!hit.collider.gameObject.GetComponent<ZombieController>().isDead)
                 {
-                    damage *= 2;
-                    StopCoroutine(ShowAndFadeObjectCrit());
-                    StartCoroutine(ShowAndFadeObjectCrit());
+                    // Deduct health from zombie
+                    var damage = Random.Range(minDamage, maxDamage);
+                    var criticalHitVariable = Random.Range(0, 100);
+                    if (criticalHitVariable < probabilityCriticalHit * 100)
+                    {
+                        damage *= 2;
+                        StopCoroutine(ShowAndFadeObjectCrit());
+                        StartCoroutine(ShowAndFadeObjectCrit());
+                    }
+                    hit.collider.gameObject.GetComponent<ZombieController>().Health -= damage;
                 }
-                hit.collider.gameObject.GetComponent<ZombieController>().Health -= damage;
             }
         }
     }

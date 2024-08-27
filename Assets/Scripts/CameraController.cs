@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 public class CameraController : MonoBehaviour
 {
     
-    
     [SerializeField] private GameObject objectToFollow;
 
     private Transform transformObjectToFollow, transformCamera;
@@ -45,6 +44,7 @@ public class CameraController : MonoBehaviour
     {
         Vector2 input = inputValue.Get<Vector2>();
         transform.RotateAround(objectToFollow.transform.position, new Vector3(0, 1, 0), input.x);
+        objectToFollow.transform.Rotate(Vector3.up, input.x);
         SetOffset();
     }
 }
