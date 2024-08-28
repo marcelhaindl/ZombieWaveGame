@@ -6,6 +6,7 @@ using UnityEditor;
 
 public class GameManager : MonoBehaviour
 {
+    // Controller
     [SerializeField] private PlayerController playerController;
     [SerializeField] private ZombieController zombieController;
 
@@ -23,8 +24,6 @@ public class GameManager : MonoBehaviour
     
     // End Screen
     [SerializeField] private GameObject endScreen;
-    
-    [SerializeField] private TextAsset gameConfig;
 
     private ZombieGenerator zombieGenerator;
     private GameConfig gameConfiguration;
@@ -54,7 +53,6 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        gameConfiguration = JsonUtility.FromJson<GameConfig>(gameConfig.ToString());
         zombieGenerator = GetComponent<ZombieGenerator>();
         initialPlayerCoordinates = playerController.transform.position;
         

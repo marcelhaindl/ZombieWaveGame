@@ -90,7 +90,7 @@ public class ZombieController : MonoBehaviour
     // Is called inside the zombie attack animation with an event
     void OnAttackHit()
     {
-        damage = UnityEngine.Random.Range(1f, 7f);
+        damage = UnityEngine.Random.Range(1f, 5f);
         player.GetComponent<PlayerController>().Health -= damage;
         player.GetComponent<Animator>().SetTrigger("gotHit");
     }

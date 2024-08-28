@@ -22,13 +22,15 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float minDamage = 10f;
     [SerializeField] private float maxDamage = 40f;
-    
+
     [SerializeField] private float probabilityCriticalHit = 0.1f;
 
     [SerializeField] private float healPerSecond = 0.5f;
 
-    [FormerlySerializedAs("ObjectCrit")] [SerializeField] private GameObject objectCrit;
-    
+    [SerializeField] private GameObject objectCrit;
+
+    [SerializeField] private TextAsset jsonFile;
+
     private bool isDead = false;
 
     private bool isOnGround = false;
@@ -59,13 +61,17 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        var data = JsonUtility.FromJson<GameConfig>(jsonFile.ToString());
         objectCrit.SetActive(false);
         Health = maxHealth;
         rb = gameObject.GetComponent<Rigidbody>();
         if (probabilityCriticalHit > 1) probabilityCriticalHit = 1;
         else if (probabilityCriticalHit < 0) probabilityCriticalHit = 0;
         StartCoroutine(CheckForGround());
-        StartCoroutine(Heal());
+        if (data.autoHeal)
+        {
+            StartCoroutine(Heal());
+        }
     }
 
     // Update is called once per frame
@@ -135,7 +141,9 @@ public class PlayerController : MonoBehaviour
         while (true)
         {
             bool raycastSuccess = Physics.Raycast(transform.position, transform.up * -1, out hit);
-            if (raycastSuccess && (hit.collider.gameObject.CompareTag("Ground") || hit.collider.gameObject.layer == LayerMask.NameToLayer("Object")) && hit.distance <= 0.100001)
+            if (raycastSuccess &&
+                (hit.collider.gameObject.CompareTag("Ground") ||
+                 hit.collider.gameObject.layer == LayerMask.NameToLayer("Object")) && hit.distance <= 0.100001)
             {
                 if (!isOnGround)
                 {
@@ -163,6 +171,7 @@ public class PlayerController : MonoBehaviour
             {
                 Health += healPerSecond;
             }
+
             yield return new WaitForSeconds(1f);
         }
     }
@@ -189,12 +198,13 @@ public class PlayerController : MonoBehaviour
                         StopCoroutine(ShowAndFadeObjectCrit());
                         StartCoroutine(ShowAndFadeObjectCrit());
                     }
+
                     hit.collider.gameObject.GetComponent<ZombieController>().Health -= damage;
                 }
             }
         }
     }
-    
+
     private IEnumerator ShowAndFadeObjectCrit()
     {
         objectCrit.SetActive(true); // Show ObjectCrit
