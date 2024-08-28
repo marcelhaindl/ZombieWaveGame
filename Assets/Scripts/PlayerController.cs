@@ -237,5 +237,6 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("isDying", true);
         animator.SetBool("isJumping", false);
         animator.SetBool("isWalking", false);
+        
     }
 }

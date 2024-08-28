@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     
     // End Screen
     [SerializeField] private GameObject endScreen;
+    [SerializeField] private TextMeshProUGUI endText;
 
     private ZombieGenerator zombieGenerator;
     private GameConfig gameConfiguration;
@@ -72,6 +73,10 @@ public class GameManager : MonoBehaviour
         
         zombieCounter.text = CurrentNumberOfZombies + " left";
         waveCounter.text = "Wave " + currentWave;
+
+        endText.text = "You died in Wave " + currentWave + ".";
+        
+        if(playerController.Health <= 0) SetUIScreenActive(endScreen);
     }
 
     private void SetUIScreenActive(GameObject screen)

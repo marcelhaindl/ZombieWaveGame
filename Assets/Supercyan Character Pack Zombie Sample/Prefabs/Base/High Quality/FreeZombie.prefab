@@ -377,7 +377,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 95394820208651578}
-  velocity: 0.0015
+  velocity: 0.0028
   maxHealth: 100
   zombieHealthBar: {fileID: 1620173452412940302}
   isDead: 0
