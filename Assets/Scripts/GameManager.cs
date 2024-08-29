@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -25,6 +26,9 @@ public class GameManager : MonoBehaviour
     // End Screen
     [SerializeField] private GameObject endScreen;
     [SerializeField] private TextMeshProUGUI endText;
+
+    // Pause Screen
+    [SerializeField] private GameObject pauseScreen;
 
     private ZombieGenerator zombieGenerator;
     private GameConfig gameConfiguration;
@@ -54,6 +58,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        PauseGame();
         zombieGenerator = GetComponent<ZombieGenerator>();
         initialPlayerCoordinates = playerController.transform.position;
         
@@ -77,11 +82,17 @@ public class GameManager : MonoBehaviour
         endText.text = "You died in Wave " + currentWave + ".";
         
         if(playerController.Health <= 0) SetUIScreenActive(endScreen);
+        
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            PauseGame();
+            SetUIScreenActive(pauseScreen);
+        }
     }
 
     private void SetUIScreenActive(GameObject screen)
     {
-        GameObject[] screens = { startScreen, gameScreen, newWaveScreen, endScreen };
+        GameObject[] screens = { startScreen, gameScreen, newWaveScreen, endScreen, pauseScreen };
 
         foreach (var s in screens)
         {
@@ -92,6 +103,7 @@ public class GameManager : MonoBehaviour
     
     public void OnStartPressed()
     {
+        ResumeGame();
         zombieGenerator.SpawnWave(currentWave);
         CurrentNumberOfZombies = GameObject.FindGameObjectsWithTag("Zombie").Length;
         SetUIScreenActive(gameScreen);
@@ -107,6 +119,7 @@ public class GameManager : MonoBehaviour
 
     public void OnQuitPressed()
     {
+        PauseGame();
         #if UNITY_EDITOR
         // Stop play mode in the Unity Editor
         EditorApplication.isPlaying = false;
@@ -119,5 +132,29 @@ public class GameManager : MonoBehaviour
     private void ResetPlayerPosition()
     {
         playerController.transform.position = initialPlayerCoordinates;
+    }
+    
+    public void PauseGame ()
+    {
+        Time.timeScale = 0;
+    }
+    
+    public void ResumeGame ()
+    {
+        Time.timeScale = 1;
+        SetUIScreenActive(gameScreen);
+    }
+
+    public void BackToStart()
+    {
+        currentWave = 1;
+        PauseGame();
+        foreach (var zombie in GameObject.FindGameObjectsWithTag("Zombie"))
+        {
+            Destroy(zombie);
+        }
+        ResetPlayerPosition();
+        playerController.Health = playerController.MaxHealth;
+        SetUIScreenActive(startScreen);
     }
 }
