@@ -6,41 +6,37 @@ using UnityEngine;
 
 public class ZombieController : MonoBehaviour
 {
-    private GameObject player;
-    private GameObject gameManager;
-   
+    // Serialize Fields
     [SerializeField] private Animator animator;
-
     [SerializeField] private float velocity = 0.0015f;
-
     [SerializeField] private float maxHealth = 100f;
-
     [SerializeField] private RectTransform zombieHealthBar;
 
+    // Local Variables
+    private GameObject player;
+    private GameObject gameManager;
     private const float AttackingDistance = 1.2f;
     private const float FocusingDistance = 100f;
-    
     private float damage;
-
     private float width, height;
-    
     private float distance;
-
-    public bool isDead = false;
-
     private float health;
     
+    // Public variables
+    public bool isDead = false;
+
+    // Getter and setter for Health variable
     public float Health
     {
         get => health;
         set
         {
             health = Mathf.Clamp(value, 0, maxHealth); // Ensure health stays within valid range
-            var newWidth = (float)health / (float)maxHealth * width;
+            var newWidth = (float)health / (float)maxHealth * width; // Calculate new width
             zombieHealthBar.sizeDelta = new Vector2(newWidth, height);
             if (health <= 0)
             {
-                Die();
+                Die(); // If health < 0 -> Die
             }
         }
     }
@@ -48,9 +44,12 @@ public class ZombieController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Get player and game manager
         player = GameObject.FindGameObjectWithTag("Player");
         gameManager = GameObject.FindGameObjectWithTag("GameManager");
-        health = maxHealth;
+        health = maxHealth; // Set health to max health
+        
+        // Health bar of zombie
         width = zombieHealthBar.sizeDelta.x;
         height = zombieHealthBar.sizeDelta.y;
         var newWidth = (float)health / (float)maxHealth * width;
@@ -62,17 +61,20 @@ public class ZombieController : MonoBehaviour
     {
         if (!isDead)
         {
+            // calculate the distance between player and zombie
+            // Can be adjusted so zombies only follow player when they are nearer than 5m for example
+            // For now it is set to a very high number so the zombies always try to walk towards the players position
             distance = Vector3.Distance(gameObject.transform.position, player.transform.position);
 
             switch (distance)
             {
-                case < AttackingDistance:
+                case < AttackingDistance: // Only let zombies attack when they are nearer than a certain distance
                     gameObject.GetComponent<Transform>()
                         .LookAt(new Vector3(player.transform.position.x, 0, player.transform.position.z));
                     animator.SetBool("isWalking", false);
                     animator.SetBool("isAttacking", true);
                     break;
-                case < FocusingDistance:
+                case < FocusingDistance: // Only let zombies follow player when they are nearer than a certain distance
                     gameObject.GetComponent<Transform>()
                         .LookAt(new Vector3(player.transform.position.x, 0, player.transform.position.z));
                     transform.Translate(new Vector3(0, 0, 1) * velocity);
@@ -88,6 +90,7 @@ public class ZombieController : MonoBehaviour
     }
 
     // Is called inside the zombie attack animation with an event
+    // When player got hit by zombie -> run animation
     void OnAttackHit()
     {
         damage = UnityEngine.Random.Range(1f, 5f);
@@ -95,10 +98,12 @@ public class ZombieController : MonoBehaviour
         player.GetComponent<Animator>().SetTrigger("gotHit");
     }
 
+    // Die function
     private void Die()
     {
         isDead = true;
         
+        // Activate dying animation and disable all other animations
         animator.SetBool("isDying", true);
         animator.SetBool("isWalking", false);
         animator.SetBool("isAttacking", false);
@@ -107,6 +112,7 @@ public class ZombieController : MonoBehaviour
         StartCoroutine(RemoveZombieAfterDelay(5f));
     }
 
+    // Removing Zombie After Delay coroutine
     private IEnumerator RemoveZombieAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
